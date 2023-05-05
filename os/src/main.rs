@@ -64,7 +64,7 @@ pub fn rust_main() -> ! {
     clear_bss();
     println!("[kernel] Hello, world!");
     mm::init();
-    println!("[kernel] back to world!");
+    println!("[kernel] FUCK to world!");
     mm::remap_test();
     trap::init();
     //trap::enable_interrupt();
