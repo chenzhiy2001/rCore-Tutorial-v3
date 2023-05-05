@@ -123,18 +123,6 @@
 <span id="123">123</span>
 <span id="124">124</span>
 <span id="125">125</span>
-<span id="126">126</span>
-<span id="127">127</span>
-<span id="128">128</span>
-<span id="129">129</span>
-<span id="130">130</span>
-<span id="131">131</span>
-<span id="132">132</span>
-<span id="133">133</span>
-<span id="134">134</span>
-<span id="135">135</span>
-<span id="136">136</span>
-<span id="137">137</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Trap handling functionality</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! For rCore, we have a single trap entry point, namely `__alltraps`. At</span>
@@ -164,6 +152,7 @@
 };
 
 <span class="macro">global_asm!</span>(<span class="macro">include_str!</span>(<span class="string">&quot;trap.S&quot;</span>));
+
 <span class="doccomment">/// initialize CSR `stvec` as the entry of `__alltraps`</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">init</span>() {
     <span class="ident">set_kernel_trap_entry</span>();
@@ -180,6 +169,7 @@
         <span class="ident">stvec::write</span>(<span class="ident">TRAMPOLINE</span> <span class="kw">as</span> <span class="ident">usize</span>, <span class="ident">TrapMode::Direct</span>);
     }
 }
+
 <span class="doccomment">/// enable timer interrupt in sie CSR</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">enable_timer_interrupt</span>() {
     <span class="kw">unsafe</span> {
@@ -191,38 +181,24 @@
 <span class="doccomment">/// handle an interrupt, exception, or system call from user space</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">trap_handler</span>() -&gt; <span class="op">!</span> {
     <span class="ident">set_kernel_trap_entry</span>();
+    <span class="kw">let</span> <span class="ident">cx</span> <span class="op">=</span> <span class="ident">current_trap_cx</span>();
     <span class="kw">let</span> <span class="ident">scause</span> <span class="op">=</span> <span class="ident">scause::read</span>();
     <span class="kw">let</span> <span class="ident">stval</span> <span class="op">=</span> <span class="ident">stval::read</span>();
     <span class="kw">match</span> <span class="ident">scause</span>.<span class="ident">cause</span>() {
         <span class="ident">Trap::Exception</span>(<span class="ident">Exception::UserEnvCall</span>) =&gt; {
-            <span class="comment">// jump to next instruction anyway</span>
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cx</span> <span class="op">=</span> <span class="ident">current_trap_cx</span>();
             <span class="ident">cx</span>.<span class="ident">sepc</span> <span class="op">+</span><span class="op">=</span> <span class="number">4</span>;
-            <span class="comment">// get system call return value</span>
-            <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">syscall</span>(<span class="ident">cx</span>.<span class="ident">x</span>[<span class="number">17</span>], [<span class="ident">cx</span>.<span class="ident">x</span>[<span class="number">10</span>], <span class="ident">cx</span>.<span class="ident">x</span>[<span class="number">11</span>], <span class="ident">cx</span>.<span class="ident">x</span>[<span class="number">12</span>]]);
-            <span class="comment">// cx is changed during sys_exec, so we have to call it again</span>
-            <span class="ident">cx</span> <span class="op">=</span> <span class="ident">current_trap_cx</span>();
-            <span class="ident">cx</span>.<span class="ident">x</span>[<span class="number">10</span>] <span class="op">=</span> <span class="ident">result</span> <span class="kw">as</span> <span class="ident">usize</span>;
+            <span class="ident">cx</span>.<span class="ident">x</span>[<span class="number">10</span>] <span class="op">=</span> <span class="ident">syscall</span>(<span class="ident">cx</span>.<span class="ident">x</span>[<span class="number">17</span>], [<span class="ident">cx</span>.<span class="ident">x</span>[<span class="number">10</span>], <span class="ident">cx</span>.<span class="ident">x</span>[<span class="number">11</span>], <span class="ident">cx</span>.<span class="ident">x</span>[<span class="number">12</span>]]) <span class="kw">as</span> <span class="ident">usize</span>;
         }
         <span class="ident">Trap::Exception</span>(<span class="ident">Exception::StoreFault</span>)
         <span class="op">|</span> <span class="ident">Trap::Exception</span>(<span class="ident">Exception::StorePageFault</span>)
-        <span class="op">|</span> <span class="ident">Trap::Exception</span>(<span class="ident">Exception::InstructionFault</span>)
-        <span class="op">|</span> <span class="ident">Trap::Exception</span>(<span class="ident">Exception::InstructionPageFault</span>)
         <span class="op">|</span> <span class="ident">Trap::Exception</span>(<span class="ident">Exception::LoadFault</span>)
         <span class="op">|</span> <span class="ident">Trap::Exception</span>(<span class="ident">Exception::LoadPageFault</span>) =&gt; {
-            <span class="macro">println!</span>(
-                <span class="string">&quot;[kernel] {:?} in application, bad addr = {:#x}, bad instruction = {:#x}, kernel killed it.&quot;</span>,
-                <span class="ident">scause</span>.<span class="ident">cause</span>(),
-                <span class="ident">stval</span>,
-                <span class="ident">current_trap_cx</span>().<span class="ident">sepc</span>,
-            );
-            <span class="comment">// page fault exit code</span>
-            <span class="ident">exit_current_and_run_next</span>(<span class="op">-</span><span class="number">2</span>);
+            <span class="macro">println!</span>(<span class="string">&quot;[kernel] PageFault in application, bad addr = {:#x}, bad instruction = {:#x}, kernel killed it.&quot;</span>, <span class="ident">stval</span>, <span class="ident">cx</span>.<span class="ident">sepc</span>);
+            <span class="ident">exit_current_and_run_next</span>();
         }
         <span class="ident">Trap::Exception</span>(<span class="ident">Exception::IllegalInstruction</span>) =&gt; {
             <span class="macro">println!</span>(<span class="string">&quot;[kernel] IllegalInstruction in application, kernel killed it.&quot;</span>);
-            <span class="comment">// illegal instruction exit code</span>
-            <span class="ident">exit_current_and_run_next</span>(<span class="op">-</span><span class="number">3</span>);
+            <span class="ident">exit_current_and_run_next</span>();
         }
         <span class="ident">Trap::Interrupt</span>(<span class="ident">Interrupt::SupervisorTimer</span>) =&gt; {
             <span class="ident">set_next_trigger</span>();
@@ -255,10 +231,10 @@
     <span class="kw">unsafe</span> {
         <span class="macro">asm!</span>(
             <span class="string">&quot;fence.i&quot;</span>,
-            <span class="string">&quot;jr {restore_va}&quot;</span>,
+            <span class="string">&quot;jr {restore_va}&quot;</span>,             <span class="comment">// jump to new addr of __restore asm function</span>
             <span class="ident">restore_va</span> <span class="op">=</span> <span class="kw">in</span>(<span class="ident">reg</span>) <span class="ident">restore_va</span>,
-            <span class="kw">in</span>(<span class="string">&quot;a0&quot;</span>) <span class="ident">trap_cx_ptr</span>,
-            <span class="kw">in</span>(<span class="string">&quot;a1&quot;</span>) <span class="ident">user_satp</span>,
+            <span class="kw">in</span>(<span class="string">&quot;a0&quot;</span>) <span class="ident">trap_cx_ptr</span>,      <span class="comment">// a0 = virt addr of Trap Context</span>
+            <span class="kw">in</span>(<span class="string">&quot;a1&quot;</span>) <span class="ident">user_satp</span>,        <span class="comment">// a1 = phy addr of usr page table</span>
             <span class="ident">options</span>(<span class="ident">noreturn</span>)
         );
     }
@@ -268,7 +244,7 @@
 <span class="doccomment">/// Unimplement: traps/interrupts/exceptions from kernel mode</span>
 <span class="doccomment">/// Todo: Chapter 9: I/O device</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">trap_from_kernel</span>() -&gt; <span class="op">!</span> {
-    <span class="macro">panic!</span>(<span class="string">&quot;a trap {:?} from kernel!&quot;</span>, <span class="ident">scause::read</span>().<span class="ident">cause</span>());
+    <span class="macro">panic!</span>(<span class="string">&quot;a trap from kernel!&quot;</span>);
 }
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">context::TrapContext</span>;

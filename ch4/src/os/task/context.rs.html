@@ -40,7 +40,7 @@
     <span class="ident">ra</span>: <span class="ident">usize</span>,
     <span class="doccomment">/// kernel stack pointer of app</span>
     <span class="ident">sp</span>: <span class="ident">usize</span>,
-    <span class="doccomment">/// s0-11 register, callee saved</span>
+    <span class="doccomment">/// callee saved registers:  s 0..11</span>
     <span class="ident">s</span>: [<span class="ident">usize</span>; <span class="number">12</span>],
 }
 
