@@ -30,10 +30,8 @@
 <span id="30">30</span>
 <span id="31">31</span>
 <span id="32">32</span>
-<span id="33">33</span>
-<span id="34">34</span>
-</pre><pre class="rust"><code><span class="doccomment">//! SBI console driver, for text output</span>
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::sbi::console_putchar</span>;
+</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::drivers::chardev::CharDevice</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::drivers::chardev::UART</span>;
 <span class="kw">use</span> <span class="ident">core::fmt</span>::{<span class="self">self</span>, <span class="ident">Write</span>};
 
 <span class="kw">struct</span> <span class="ident">Stdout</span>;
@@ -41,7 +39,7 @@
 <span class="kw">impl</span> <span class="ident">Write</span> <span class="kw">for</span> <span class="ident">Stdout</span> {
     <span class="kw">fn</span> <span class="ident">write_str</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="kw">for</span> <span class="ident">c</span> <span class="kw">in</span> <span class="ident">s</span>.<span class="ident">chars</span>() {
-            <span class="ident">console_putchar</span>(<span class="ident">c</span> <span class="kw">as</span> <span class="ident">usize</span>);
+            <span class="ident">UART</span>.<span class="ident">write</span>(<span class="ident">c</span> <span class="kw">as</span> <span class="ident">u8</span>);
         }
         <span class="prelude-val">Ok</span>(())
     }
@@ -52,18 +50,16 @@
 }
 
 <span class="attribute">#[<span class="ident">macro_export</span>]</span>
-<span class="doccomment">/// print string macro</span>
 <span class="macro">macro_rules!</span> <span class="ident">print</span> {
     (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">fmt</span>: <span class="ident">literal</span> $(, $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">arg</span>: <span class="ident">tt</span>)<span class="op">+</span>)<span class="question-mark">?</span>) =&gt; {
-        <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::console::print</span>(<span class="macro">format_args!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">fmt</span> $(, $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">arg</span>)<span class="op">+</span>)<span class="question-mark">?</span>));
+        <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::console::print</span>(<span class="macro">format_args!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">fmt</span> $(, $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">arg</span>)<span class="op">+</span>)<span class="question-mark">?</span>))
     }
 }
 
 <span class="attribute">#[<span class="ident">macro_export</span>]</span>
-<span class="doccomment">/// println string macro</span>
 <span class="macro">macro_rules!</span> <span class="ident">println</span> {
     (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">fmt</span>: <span class="ident">literal</span> $(, $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">arg</span>: <span class="ident">tt</span>)<span class="op">+</span>)<span class="question-mark">?</span>) =&gt; {
-        <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::console::print</span>(<span class="macro">format_args!</span>(<span class="macro">concat!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">fmt</span>, <span class="string">&quot;\n&quot;</span>) $(, $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">arg</span>)<span class="op">+</span>)<span class="question-mark">?</span>));
+        <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::console::print</span>(<span class="macro">format_args!</span>(<span class="macro">concat!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">fmt</span>, <span class="string">&quot;\n&quot;</span>) $(, $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">arg</span>)<span class="op">+</span>)<span class="question-mark">?</span>))
     }
 }
 </code></pre></div>

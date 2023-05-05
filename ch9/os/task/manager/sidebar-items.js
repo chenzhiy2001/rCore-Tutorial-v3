@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["add_task","Interface offered to add task"],["fetch_task","Interface offered to pop the first task"]],"struct":[["TASK_MANAGER",""],["TaskManager","A array of `TaskControlBlock` that is thread-safe"]]};
+window.SIDEBAR_ITEMS = {"fn":[["add_task",""],["fetch_task",""],["insert_into_pid2process",""],["pid2process",""],["remove_from_pid2process",""],["wakeup_task",""]],"struct":[["PID2PCB",""],["TASK_MANAGER",""],["TaskManager",""]]};

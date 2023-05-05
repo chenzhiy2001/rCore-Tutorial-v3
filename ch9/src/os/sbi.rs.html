@@ -13,37 +13,7 @@
 <span id="13">13</span>
 <span id="14">14</span>
 <span id="15">15</span>
-<span id="16">16</span>
-<span id="17">17</span>
-<span id="18">18</span>
-<span id="19">19</span>
-<span id="20">20</span>
-<span id="21">21</span>
-<span id="22">22</span>
-<span id="23">23</span>
-<span id="24">24</span>
-<span id="25">25</span>
-<span id="26">26</span>
-<span id="27">27</span>
-<span id="28">28</span>
-<span id="29">29</span>
-<span id="30">30</span>
-</pre><pre class="rust"><code><span class="doccomment">//! SBI call wrappers</span>
-<span class="attribute">#![<span class="ident">allow</span>(<span class="ident">unused</span>)]</span>
-
-<span class="doccomment">/// use sbi call to putchar in console (qemu uart handler)</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">console_putchar</span>(<span class="ident">c</span>: <span class="ident">usize</span>) {
-    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">deprecated</span>)]</span>
-    <span class="ident">sbi_rt::legacy::console_putchar</span>(<span class="ident">c</span>);
-}
-
-<span class="doccomment">/// use sbi call to getchar from console (qemu uart handler)</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">console_getchar</span>() -&gt; <span class="ident">usize</span> {
-    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">deprecated</span>)]</span>
-    <span class="ident">sbi_rt::legacy::console_getchar</span>()
-}
-
-<span class="doccomment">/// use sbi call to set timer</span>
+</pre><pre class="rust"><code><span class="doccomment">/// use sbi call to set timer</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_timer</span>(<span class="ident">timer</span>: <span class="ident">usize</span>) {
     <span class="ident">sbi_rt::set_timer</span>(<span class="ident">timer</span> <span class="kw">as</span> <span class="kw">_</span>);
 }
