@@ -57,7 +57,7 @@ fn clear_bss() {
 #[no_mangle]
 pub fn rust_main() -> ! {
     clear_bss();
-    println!("[kernel] Hello, world!");
+    println!("[kernel] FUCK, world!");
     trap::init();
     loader::load_apps();
     trap::enable_timer_interrupt();
