@@ -135,6 +135,9 @@
 <span id="135">135</span>
 <span id="136">136</span>
 <span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Trap handling functionality</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! For rCore, we have a single trap entry point, namely `__alltraps`. At</span>
@@ -236,6 +239,7 @@
             );
         }
     }
+    <span class="comment">//println!(&quot;before trap_return&quot;);</span>
     <span class="ident">trap_return</span>();
 }
 
@@ -268,6 +272,8 @@
 <span class="doccomment">/// Unimplement: traps/interrupts/exceptions from kernel mode</span>
 <span class="doccomment">/// Todo: Chapter 9: I/O device</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">trap_from_kernel</span>() -&gt; <span class="op">!</span> {
+    <span class="kw">use</span> <span class="ident">riscv::register::sepc</span>;
+    <span class="macro">println!</span>(<span class="string">&quot;stval = {:#x}, sepc = {:#x}&quot;</span>, <span class="ident">stval::read</span>(), <span class="ident">sepc::read</span>());
     <span class="macro">panic!</span>(<span class="string">&quot;a trap {:?} from kernel!&quot;</span>, <span class="ident">scause::read</span>().<span class="ident">cause</span>());
 }
 
