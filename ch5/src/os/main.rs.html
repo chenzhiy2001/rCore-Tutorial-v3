@@ -145,7 +145,7 @@
 <span class="doccomment">/// the rust entry-point of os</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">rust_main</span>() -&gt; <span class="op">!</span> {
     <span class="ident">clear_bss</span>();
-    <span class="macro">println!</span>(<span class="string">&quot;[kernel] Hello, world!&quot;</span>);
+    <span class="macro">println!</span>(<span class="string">&quot;[kernel] FUCK, world!&quot;</span>);
     <span class="ident">mm::init</span>();
     <span class="ident">mm::remap_test</span>();
     <span class="ident">task::add_initproc</span>();
