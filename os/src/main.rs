@@ -67,7 +67,7 @@ fn clear_bss() {
 /// the rust entry-point of os
 pub fn rust_main() -> ! {
     clear_bss();
-    println!("[kernel] Hello, world!");
+    println!("[kernel] FUCK, world!");
     mm::init();
     mm::remap_test();
     trap::init();
